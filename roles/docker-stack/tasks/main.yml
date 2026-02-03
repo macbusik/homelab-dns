@@ -11,7 +11,7 @@
 
 - name: Wgraj konfigurację Wildcard DNS
   template:
-    src: 99-wildcard.conf
+    src: 99-wildcard.conf.j2
     dest: "{{ install_path }}/dnsmasq.d/99-wildcard.conf"
   notify: Restart Pihole
 
@@ -19,14 +19,13 @@
   template:
     src: docker-compose.yml.j2
     dest: "{{ install_path }}/docker-compose.yml"
-  register: compose_file  # Śledzimy, czy plik się zmienił
+  register: compose_file  
 
 - name: Uruchom kontenery (Docker Compose)
   community.docker.docker_compose_v2:
     project_src: "{{ install_path }}"
     state: present
     pull: always
-    # Jeśli plik się zmienił, wymuś restart kontenerów
     recreate: "{{ 'always' if compose_file.changed else 'auto' }}"
   notify: Restart Pihole
 - name: Czekaj chwilę na uruchomienie DNS resolvera
