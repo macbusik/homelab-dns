@@ -1,0 +1,8 @@
+---
+- name: Wdrażanie infrastruktury Homelab
+  hosts: homelab
+  become: true 
+
+  roles:
+    - common       
+    - docker-stack  

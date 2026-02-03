@@ -1,0 +1,61 @@
+services:
+  traefik:
+    image: traefik:v3.6
+    container_name: traefik
+    restart: always
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - proxy
+
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    restart: always
+    networks:
+      - proxy
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "8888:80"
+    environment:
+      TZ: 'Europe/Warsaw'
+      FTLCONF_misc.dnsmasq_d: 'true'
+      FTLCONF_dns_listeningMode: 'all'
+    volumes:
+      - './etc-pihole:/etc/pihole'
+      - './dnsmasq.d:/etc/dnsmasq.d'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pihole.rule=Host(`pihole.{{ root_domain }}`)"
+      - "traefik.http.services.pihole.loadbalancer.server.port=80"
+
+  whoami:
+    image: traefik/whoami
+    container_name: test-whoami
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.{{ root_domain }}`)"
+
+  nginx:
+    image: nginx:alpine
+    container_name: test-nginx
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx.rule=Host(`test.{{ root_domain }}`)"
+      - "traefik.http.services.nginx.loadbalancer.server.port=80"
+
+networks:
+  proxy:
+    driver: bridge 

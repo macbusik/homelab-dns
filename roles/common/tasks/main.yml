@@ -1,0 +1,42 @@
+---
+- name: Instalacja Dockera i zależności (Arch Linux)
+  pacman:
+    name:
+      - docker
+      - docker-compose
+      - python-docker   # To jest kluczowe! (zwykle ciągnie za sobą python-requests)
+      - python-requests # Dla pewności dodajmy też to
+      - ldns
+    state: present
+    update_cache: yes
+- name: Włącz usługę Docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Włącz IP Forwarding (Kluczowe dla routingu!)
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    reload: yes
+
+- name: Załaduj moduł br_netfilter
+  modprobe:
+    name: br_netfilter
+    state: present
+
+- name: Upewnij się, że moduł ładuje się przy starcie
+  copy:
+    content: "br_netfilter"
+    dest: /etc/modules-load.d/br_netfilter.conf
+
+- name: Ustaw politykę FORWARD na ACCEPT w iptables
+  iptables:
+    chain: FORWARD
+    policy: ACCEPT
+
+- name: Zapisz reguły iptables (Arch Linux)
+  shell: "iptables-save > /etc/iptables/iptables.rules"
+  changed_when: false
