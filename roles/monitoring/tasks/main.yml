@@ -1,0 +1,34 @@
+---
+- name: Wait for DNS resolver to start
+  pause:
+    seconds: "{{ dns_startup_wait }}"
+
+- name: Test DNS response for domain
+  command: "docker exec pihole dig +short @{{ dns_test_ip }} whoami.{{ root_domain }}"
+  register: dns_test
+  changed_when: false
+  retries: "{{ dns_test_retries }}"
+  delay: "{{ dns_test_delay }}"
+  until: dns_test.stdout != ""
+
+- name: Validate DNS result
+  assert:
+    that:
+      - dns_test.stdout == server_ip
+    fail_msg: "ERROR: DNS returned '{{ dns_test.stdout }}' instead of expected '{{ server_ip }}'"
+    success_msg: "SUCCESS: Domain whoami.{{ root_domain }} correctly points to {{ server_ip }}"
+
+- name: Test HTTP availability through reverse proxy
+  uri:
+    url: "http://{{ dns_test_ip }}"
+    headers:
+      Host: "whoami.{{ root_domain }}"
+    return_content: no
+    status_code: 200
+  register: http_test
+  ignore_errors: yes
+
+- name: Service status summary
+  debug:
+    msg: "System ready! You can access http://whoami.{{ root_domain }}"
+  when: http_test.status == 200

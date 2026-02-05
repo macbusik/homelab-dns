@@ -4,5 +4,8 @@
   become: true 
 
   roles:
-    - common       
-    - docker-stack  
+    - system-setup
+    - docker-engine
+    - reverse-proxy
+    - dns-server
+    - monitoring  

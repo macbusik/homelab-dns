@@ -1,0 +1,17 @@
+---
+# Monitoring configuration
+dns_test_ip: "127.0.0.1"
+dns_startup_wait: 5
+dns_test_retries: 5
+dns_test_delay: 3
+
+# Health check endpoints
+health_checks:
+  - name: "DNS Resolution"
+    type: "dns"
+    target: "whoami.{{ root_domain }}"
+  - name: "HTTP Availability"
+    type: "http"
+    url: "http://{{ dns_test_ip }}"
+    headers:
+      Host: "whoami.{{ root_domain }}"

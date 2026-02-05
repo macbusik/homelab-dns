@@ -2,24 +2,14 @@ root_domain: "domek"
 server_ip: "192.168.10.217"
 install_path: "/opt/homelab"
 
-# System configuration
+# Override defaults for this server
 timezone: "Europe/Warsaw"
-dns_test_ip: "127.0.0.1"
-dns_startup_wait: 5
-dns_test_retries: 5
-dns_test_delay: 3
+dns_ports:
+  - "{{ dns_port }}:{{ dns_port }}/tcp"
+  - "{{ dns_port }}:{{ dns_port }}/udp"
+  - "{{ pihole_web_port }}:80"
 
-# Port configuration
-pihole_web_port: 8888
-traefik_dashboard_port: 8080
-traefik_web_port: 80
-dns_port: 53
-
-# OS-specific paths
-modules_load_dir: "/etc/modules-load.d"
-iptables_rules_path: "/etc/iptables/iptables.rules"
-
-# Package manager configuration
+# Arch Linux specific
 package_manager: "pacman"
 docker_packages:
   - docker

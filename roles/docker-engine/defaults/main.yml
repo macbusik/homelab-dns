@@ -1,0 +1,12 @@
+---
+# Docker configuration defaults
+docker_packages:
+  - docker
+  - docker-compose
+  - python-docker
+  - python-requests
+
+docker_service:
+  name: docker
+  state: started
+  enabled: yes

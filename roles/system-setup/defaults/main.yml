@@ -1,0 +1,15 @@
+---
+# System configuration defaults
+modules_load_dir: "/etc/modules-load.d"
+iptables_rules_path: "/etc/iptables/iptables.rules"
+package_manager: "pacman"
+
+# Network configuration
+ip_forward_enabled: true
+netfilter_modules:
+  - br_netfilter
+
+# Firewall rules
+iptables_policies:
+  - chain: FORWARD
+    policy: ACCEPT

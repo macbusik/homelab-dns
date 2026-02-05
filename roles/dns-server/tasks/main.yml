@@ -1,0 +1,31 @@
+---
+- name: Create DNS server directory structure
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ install_path }}/etc-pihole"
+    - "{{ install_path }}/dnsmasq.d"
+
+- name: Deploy Wildcard DNS configuration
+  template:
+    src: 99-wildcard.conf.j2
+    dest: "{{ install_path }}/dnsmasq.d/99-wildcard.conf"
+  notify: restart pihole
+
+- name: Deploy DNS server container
+  template:
+    src: pihole-compose.yml.j2
+    dest: "{{ install_path }}/pihole-compose.yml"
+  register: pihole_compose
+
+- name: Start DNS server
+  community.docker.docker_compose_v2:
+    project_src: "{{ install_path }}"
+    files:
+      - pihole-compose.yml
+    state: present
+    pull: always
+    recreate: "{{ 'always' if pihole_compose.changed else 'auto' }}"
+  notify: restart pihole

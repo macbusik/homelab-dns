@@ -1,0 +1,21 @@
+---
+- name: Create reverse proxy directory
+  file:
+    path: "{{ install_path }}"
+    state: directory
+    mode: '0755'
+
+- name: Deploy reverse proxy configuration
+  template:
+    src: traefik-compose.yml.j2
+    dest: "{{ install_path }}/traefik-compose.yml"
+  register: traefik_compose
+
+- name: Start reverse proxy
+  community.docker.docker_compose_v2:
+    project_src: "{{ install_path }}"
+    files:
+      - traefik-compose.yml
+    state: present
+    pull: always
+    recreate: "{{ 'always' if traefik_compose.changed else 'auto' }}"

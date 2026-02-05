@@ -1,0 +1,17 @@
+---
+# Reverse proxy configuration
+reverse_proxy_image: "traefik:v3.6"
+reverse_proxy_name: "traefik"
+traefik_web_port: 80
+traefik_dashboard_port: 8080
+
+# Traefik configuration
+traefik_commands:
+  - "--api.insecure=true"
+  - "--api.dashboard=true"
+  - "--providers.docker=true"
+  - "--entrypoints.web.address=:{{ traefik_web_port }}"
+
+# Traefik volumes
+traefik_volumes:
+  - /var/run/docker.sock:/var/run/docker.sock:ro

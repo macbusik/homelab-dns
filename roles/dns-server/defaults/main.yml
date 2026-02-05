@@ -1,0 +1,18 @@
+---
+# DNS server configuration
+dns_server_image: "pihole/pihole:latest"
+dns_server_name: "pihole"
+dns_port: 53
+pihole_web_port: 8888
+timezone: "UTC"
+
+# DNS server environment
+dns_environment:
+  TZ: "{{ timezone }}"
+  FTLCONF_misc.dnsmasq_d: 'true'
+  FTLCONF_dns_listeningMode: 'all'
+
+# DNS server volumes
+dns_volumes:
+  - './etc-pihole:/etc/pihole'
+  - './dnsmasq.d:/etc/dnsmasq.d'

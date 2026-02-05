@@ -1,0 +1,5 @@
+---
+- name: restart pihole
+  community.docker.docker_container:
+    name: "{{ dns_server_name }}"
+    restart: true

@@ -1,0 +1,26 @@
+services:
+  {{ reverse_proxy_name }}:
+    image: {{ reverse_proxy_image }}
+    container_name: {{ reverse_proxy_name }}
+    restart: always
+    command:
+{% for cmd in traefik_commands %}
+      - "{{ cmd }}"
+{% endfor %}
+    ports:
+      - "{{ traefik_web_port }}:{{ traefik_web_port }}"
+      - "{{ traefik_dashboard_port }}:{{ traefik_dashboard_port }}"
+    volumes:
+{% for volume in traefik_volumes %}
+      - {{ volume }}
+{% endfor %}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.{{ reverse_proxy_name }}.rule=Host(`{{ reverse_proxy_name }}.{{ root_domain }}`)"
+      - "traefik.http.routers.{{ reverse_proxy_name }}.service=api@internal"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    driver: bridge

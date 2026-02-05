@@ -1,0 +1,5 @@
+---
+- name: restart traefik
+  community.docker.docker_container:
+    name: "{{ reverse_proxy_name }}"
+    restart: true

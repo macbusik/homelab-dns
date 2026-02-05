@@ -1,0 +1,26 @@
+---
+- name: Enable IP Forwarding (Critical for routing!)
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    reload: yes
+
+- name: Load br_netfilter module
+  modprobe:
+    name: br_netfilter
+    state: present
+
+- name: Ensure module loads at startup
+  copy:
+    content: "br_netfilter"
+    dest: "{{ modules_load_dir }}/br_netfilter.conf"
+
+- name: Set FORWARD policy to ACCEPT in iptables
+  iptables:
+    chain: FORWARD
+    policy: ACCEPT
+
+- name: Save iptables rules
+  shell: "iptables-save > {{ iptables_rules_path }}"
+  changed_when: false

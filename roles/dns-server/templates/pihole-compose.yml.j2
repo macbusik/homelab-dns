@@ -1,0 +1,27 @@
+services:
+  {{ dns_server_name }}:
+    image: {{ dns_server_image }}
+    container_name: {{ dns_server_name }}
+    restart: always
+    networks:
+      - proxy
+    ports:
+{% for port_mapping in dns_ports %}
+      - "{{ port_mapping }}"
+{% endfor %}
+    environment:
+{% for key, value in dns_environment.items() %}
+      {{ key }}: '{{ value }}'
+{% endfor %}
+    volumes:
+{% for volume in dns_volumes %}
+      - {{ volume }}
+{% endfor %}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.{{ dns_server_name }}.rule=Host(`{{ dns_server_name }}.{{ root_domain }}`)"
+      - "traefik.http.services.{{ dns_server_name }}.loadbalancer.server.port=80"
+
+networks:
+  proxy:
+    external: true
