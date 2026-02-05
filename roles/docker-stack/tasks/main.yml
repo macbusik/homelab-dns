@@ -1,5 +1,5 @@
 ---
-- name: Stwórz strukturę katalogów
+- name: Create directory structure
   file:
     path: "{{ item }}"
     state: directory
@@ -9,30 +9,30 @@
     - "{{ install_path }}/etc-pihole"
     - "{{ install_path }}/dnsmasq.d"
 
-- name: Wgraj konfigurację Wildcard DNS
+- name: Deploy Wildcard DNS configuration
   template:
     src: 99-wildcard.conf.j2
     dest: "{{ install_path }}/dnsmasq.d/99-wildcard.conf"
   notify: Restart Pihole
 
-- name: Wgraj Docker Compose
+- name: Deploy Docker Compose
   template:
     src: docker-compose.yml.j2
     dest: "{{ install_path }}/docker-compose.yml"
   register: compose_file  
 
-- name: Uruchom kontenery (Docker Compose)
+- name: Start containers (Docker Compose)
   community.docker.docker_compose_v2:
     project_src: "{{ install_path }}"
     state: present
     pull: always
     recreate: "{{ 'always' if compose_file.changed else 'auto' }}"
   notify: Restart Pihole
-- name: Czekaj chwilę na uruchomienie DNS resolvera
+- name: Wait for DNS resolver to start
   pause:
     seconds: 5
 
-- name: Testuj odpowiedź DNS dla domeny .domek (wewnątrz kontenera)
+- name: Test DNS response for .domek domain (inside container)
   command: "docker exec pihole dig +short @127.0.0.1 whoami.{{ root_domain }}"
   register: dns_test
   changed_when: false
@@ -40,14 +40,14 @@
   delay: 3
   until: dns_test.stdout != ""
 
-- name: Walidacja wyniku DNS
+- name: Validate DNS result
   assert:
     that:
       - dns_test.stdout == server_ip
-    fail_msg: "BŁĄD: DNS zwrócił '{{ dns_test.stdout }}' zamiast oczekiwanego '{{ server_ip }}'"
-    success_msg: "SUKCES: Domena whoami.{{ root_domain }} poprawnie wskazuje na {{ server_ip }}"
+    fail_msg: "ERROR: DNS returned '{{ dns_test.stdout }}' instead of expected '{{ server_ip }}'"
+    success_msg: "SUCCESS: Domain whoami.{{ root_domain }} correctly points to {{ server_ip }}"
 
-- name: Testuj dostępność HTTP przez Traefika
+- name: Test HTTP availability through Traefik
   uri:
     url: "http://127.0.0.1"
     headers:
@@ -57,7 +57,7 @@
   register: http_test
   ignore_errors: yes
 
-- name: Podsumowanie statusu usługi
+- name: Service status summary
   debug:
-    msg: "System gotowy! Możesz wejść na http://whoami.{{ root_domain }}"
+    msg: "System ready! You can access http://whoami.{{ root_domain }}"
   when: http_test.status == 200

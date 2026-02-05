@@ -1,5 +1,5 @@
 ---
-- name: Instalacja Dockera i zależności (Arch Linux)
+- name: Install Docker and dependencies (Arch Linux)
   pacman:
     name:
       - docker
@@ -9,34 +9,34 @@
       - ldns
     state: present
     update_cache: yes
-- name: Włącz usługę Docker
+- name: Enable Docker service
   service:
     name: docker
     state: started
     enabled: yes
 
-- name: Włącz IP Forwarding (Kluczowe dla routingu!)
+- name: Enable IP Forwarding (Critical for routing!)
   sysctl:
     name: net.ipv4.ip_forward
     value: '1'
     state: present
     reload: yes
 
-- name: Załaduj moduł br_netfilter
+- name: Load br_netfilter module
   modprobe:
     name: br_netfilter
     state: present
 
-- name: Upewnij się, że moduł ładuje się przy starcie
+- name: Ensure module loads at startup
   copy:
     content: "br_netfilter"
     dest: /etc/modules-load.d/br_netfilter.conf
 
-- name: Ustaw politykę FORWARD na ACCEPT w iptables
+- name: Set FORWARD policy to ACCEPT in iptables
   iptables:
     chain: FORWARD
     policy: ACCEPT
 
-- name: Zapisz reguły iptables (Arch Linux)
+- name: Save iptables rules (Arch Linux)
   shell: "iptables-save > /etc/iptables/iptables.rules"
   changed_when: false
