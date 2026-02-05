@@ -7,10 +7,10 @@ services:
       - "--api.insecure=true"
       - "--api.dashboard=true"
       - "--providers.docker=true"
-      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.address=:{{ traefik_web_port }}"
     ports:
-      - "80:80"
-      - "8080:8080"
+      - "{{ traefik_web_port }}:{{ traefik_web_port }}"
+      - "{{ traefik_dashboard_port }}:{{ traefik_dashboard_port }}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     labels:
@@ -27,11 +27,11 @@ services:
     networks:
       - proxy
     ports:
-      - "53:53/tcp"
-      - "53:53/udp"
-      - "8888:80"
+      - "{{ dns_port }}:{{ dns_port }}/tcp"
+      - "{{ dns_port }}:{{ dns_port }}/udp"
+      - "{{ pihole_web_port }}:80"
     environment:
-      TZ: 'Europe/Warsaw'
+      TZ: '{{ timezone }}'
       FTLCONF_misc.dnsmasq_d: 'true'
       FTLCONF_dns_listeningMode: 'all'
     volumes:
@@ -63,4 +63,4 @@ services:
 
 networks:
   proxy:
-    driver: bridge 
+    driver: bridge

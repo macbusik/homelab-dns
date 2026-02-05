@@ -1,14 +1,10 @@
 ---
-- name: Install Docker and dependencies (Arch Linux)
+- name: Install Docker and dependencies
   pacman:
-    name:
-      - docker
-      - docker-compose
-      - python-docker   # To jest kluczowe! (zwykle ciągnie za sobą python-requests)
-      - python-requests # Dla pewności dodajmy też to
-      - ldns
+    name: "{{ docker_packages }}"
     state: present
     update_cache: yes
+  when: package_manager == "pacman"
 - name: Enable Docker service
   service:
     name: docker
@@ -30,13 +26,13 @@
 - name: Ensure module loads at startup
   copy:
     content: "br_netfilter"
-    dest: /etc/modules-load.d/br_netfilter.conf
+    dest: "{{ modules_load_dir }}/br_netfilter.conf"
 
 - name: Set FORWARD policy to ACCEPT in iptables
   iptables:
     chain: FORWARD
     policy: ACCEPT
 
-- name: Save iptables rules (Arch Linux)
-  shell: "iptables-save > /etc/iptables/iptables.rules"
+- name: Save iptables rules
+  shell: "iptables-save > {{ iptables_rules_path }}"
   changed_when: false

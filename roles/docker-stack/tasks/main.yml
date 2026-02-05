@@ -30,14 +30,14 @@
   notify: Restart Pihole
 - name: Wait for DNS resolver to start
   pause:
-    seconds: 5
+    seconds: "{{ dns_startup_wait }}"
 
-- name: Test DNS response for .domek domain (inside container)
-  command: "docker exec pihole dig +short @127.0.0.1 whoami.{{ root_domain }}"
+- name: Test DNS response for domain (inside container)
+  command: "docker exec pihole dig +short @{{ dns_test_ip }} whoami.{{ root_domain }}"
   register: dns_test
   changed_when: false
-  retries: 5
-  delay: 3
+  retries: "{{ dns_test_retries }}"
+  delay: "{{ dns_test_delay }}"
   until: dns_test.stdout != ""
 
 - name: Validate DNS result
