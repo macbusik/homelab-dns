@@ -4,17 +4,30 @@ A complete DNS and reverse proxy solution for home networks using Pi-hole, Traef
 
 ## Prerequisites
 
-### Router DHCP Configuration
+### Router Configuration
 
-**CRITICAL**: Your home router's DHCP server must be configured to use this DNS server, otherwise clients won't resolve your local domains.
+**CRITICAL**: Your home router must be configured properly for this DNS server to work across your network.
+
+#### 1. Set Static IP for Home Server
+
+Your home server needs a static IP address to ensure the DNS service remains accessible:
 
 1. **Access your router's admin panel** (usually `192.168.1.1` or `192.168.0.1`)
-2. **Navigate to DHCP settings** (often under "Network" or "LAN" settings)
-3. **Set Primary DNS** to your server's IP address (e.g., `192.168.10.217`)
-4. **Set Secondary DNS** to a public DNS like `8.8.8.8` or `1.1.1.1` for fallback
-5. **Save and restart DHCP service** or reboot router
+2. **Navigate to DHCP settings** or "Connected Devices"
+3. **Find your home server** in the device list
+4. **Set static/reserved IP** for your server (e.g., `192.168.10.217`)
+5. **Note the assigned IP** - you'll need this for configuration
 
-After this change, all devices on your network will automatically use your homelab DNS server for domain resolution.
+#### 2. Configure DHCP DNS Settings
+
+After setting the static IP, configure DHCP to use your DNS server:
+
+1. **Navigate to DHCP settings** (often under "Network" or "LAN" settings)
+2. **Set Primary DNS** to your server's static IP address
+3. **Set Secondary DNS** to a public DNS like `8.8.8.8` or `1.1.1.1` for fallback
+4. **Save and restart DHCP service** or reboot router
+
+After these changes, all devices on your network will automatically use your homelab DNS server for domain resolution.
 
 ### System Requirements
 
